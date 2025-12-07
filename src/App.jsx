@@ -75,7 +75,7 @@ const App = () => {
 
   // --- Task 관리 핸들러 ---
   const addTask = () => {
-    if (tasks.length >= 5) return;
+    if (tasks.length >= 10) return;
     const newId = Math.max(...tasks.map(t => t.id)) + 1;
     setTasks([...tasks, { 
       id: newId, 
@@ -178,7 +178,7 @@ const App = () => {
               척추 압박력 & 용량 평가 시뮬레이터
             </h1>
             <p className="text-slate-500 mt-1 text-sm">
-              복합 작업(최대 5개) 평가 지원
+              복합 작업(최대 10개) 평가 지원
             </p>
           </div>
           <div className="flex gap-4 text-sm bg-slate-50 p-3 rounded-lg border border-slate-200">
@@ -207,11 +207,11 @@ const App = () => {
           <div className="xl:col-span-5 space-y-4">
             <div className="flex items-center justify-between mb-2">
                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                 <Calculator className="w-5 h-5" /> 작업 목록 ({tasks.length}/5)
+                 <Calculator className="w-5 h-5" /> 작업 목록 ({tasks.length}/10)
                </h2>
-               <button 
+               <button
                  onClick={addTask}
-                 disabled={tasks.length >= 5}
+                 disabled={tasks.length >= 10}
                  className="text-sm flex items-center gap-1 bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                >
                  <Plus className="w-4 h-4" /> 작업 추가
