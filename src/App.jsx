@@ -35,6 +35,7 @@ const App = () => {
   const [daysPerYear, setDaysPerYear] = useState(220);
   const [workYears, setWorkYears] = useState(10);
   const [activeTaskId, setActiveTaskId] = useState(1);
+  const [mobileTab, setMobileTab] = useState('list'); // 'list' or 'editor'
 
   const activities = {
     G1: { code: 'G1', type: 'lift', b: 800, m: 45, label: '똑바로 → 똑바로', imageStart: g1Start, imageEnd: g1End },
@@ -155,49 +156,77 @@ const App = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* TOP HEADER */}
-      <div className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Calculator className="w-6 h-6 text-slate-700" />
-          <h1 className="text-lg font-bold text-slate-900">척추 압박력 시뮬레이터</h1>
+      <div className="bg-white border-b border-slate-200 px-3 md:px-6 py-3 flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-0 justify-between">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Calculator className="w-5 h-5 md:w-6 md:h-6 text-slate-700" />
+          <h1 className="text-base md:text-lg font-bold text-slate-900">척추 압박력 시뮬레이터</h1>
         </div>
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 text-sm">
+        <div className="flex flex-wrap items-center gap-3 md:gap-6 w-full md:w-auto">
+          <div className="flex items-center gap-2 text-xs md:text-sm">
             <Upload className="w-4 h-4 text-slate-600" />
             <button className="text-slate-700 hover:text-slate-900">불러오기</button>
           </div>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-xs md:text-sm">
             <Save className="w-4 h-4 text-slate-600" />
             <button className="text-slate-700 hover:text-slate-900">저장</button>
           </div>
-          <div className="h-6 w-px bg-slate-300"></div>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="h-6 w-px bg-slate-300 hidden md:block"></div>
+          <div className="flex items-center gap-2 text-xs md:text-sm">
             <label className="text-slate-600">연간 근무</label>
             <input
               type="number"
               value={daysPerYear}
               onChange={(e) => setDaysPerYear(Number(e.target.value))}
-              className="w-16 px-2 py-1 border border-slate-300 rounded text-slate-900 text-center"
+              className="w-12 md:w-16 px-2 py-1 border border-slate-300 rounded text-slate-900 text-center"
             />
             <span className="text-slate-600">일</span>
           </div>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-xs md:text-sm">
             <label className="text-slate-600">근속 연수</label>
             <input
               type="number"
               value={workYears}
               onChange={(e) => setWorkYears(Number(e.target.value))}
-              className="w-16 px-2 py-1 border border-slate-300 rounded text-slate-900 text-center"
+              className="w-12 md:w-16 px-2 py-1 border border-slate-300 rounded text-slate-900 text-center"
             />
             <span className="text-slate-600">년</span>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-1">
+      {/* MOBILE TAB NAVIGATION - Only visible < md (768px) */}
+      <div className="md:hidden bg-white border-b border-slate-200">
+        <div className="flex">
+          <button
+            onClick={() => setMobileTab('list')}
+            className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
+              mobileTab === 'list'
+                ? 'text-slate-900 border-b-2 border-slate-900 bg-slate-50'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            작업 목록
+          </button>
+          <button
+            onClick={() => setMobileTab('editor')}
+            className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
+              mobileTab === 'editor'
+                ? 'text-slate-900 border-b-2 border-slate-900 bg-slate-50'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            상세 편집
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
         {/* LEFT SIDEBAR */}
-        <div className="w-96 bg-white border-r border-slate-200 flex flex-col">
+        <div className={`w-full md:w-96 bg-white border-r border-slate-200 flex flex-col ${
+          mobileTab === 'editor' ? 'hidden md:flex' : 'flex'
+        }`}>
           {/* Task List Header */}
-          <div className="p-4 border-b border-slate-200">
+          <div className="p-3 md:p-4 border-b border-slate-200">
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
                 <span className="bg-slate-100 p-1 rounded">
@@ -216,7 +245,7 @@ const App = () => {
           </div>
 
           {/* Task List */}
-          <div className="overflow-y-auto p-3" style={{ maxHeight: 'calc(100vh - 550px)' }}>
+          <div className="overflow-y-auto p-2 md:p-3" style={{ maxHeight: 'calc(100vh - 420px)' }}>
             <div className="space-y-2">
               {result.taskResults.map((task) => {
                 const isActive = activeTaskId === task.id;
@@ -229,7 +258,13 @@ const App = () => {
                         ? 'bg-slate-900 border-slate-900 text-white'
                         : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
-                    onClick={() => setActiveTaskId(task.id)}
+                    onClick={() => {
+                      setActiveTaskId(task.id);
+                      // 모바일에서 작업 선택 시 편집 탭으로 자동 전환
+                      if (window.innerWidth < 768) {
+                        setMobileTab('editor');
+                      }
+                    }}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
@@ -267,7 +302,7 @@ const App = () => {
           </div>
 
           {/* Summary Cards */}
-          <div className="p-4 border-t border-slate-200 space-y-2">
+          <div className="p-3 md:p-4 border-t border-slate-200 space-y-2">
             <div className="flex items-center gap-2 mb-3">
               <span className="bg-slate-100 p-1 rounded">
                 <CheckCircle className="w-4 h-4" />
@@ -280,7 +315,7 @@ const App = () => {
             <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
               <div className="text-xs text-slate-600 mb-1">최대 압박력 (N)</div>
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-bold text-slate-900">{result.maxForce.toLocaleString()}</span>
+                <span className="text-xl md:text-2xl font-bold text-slate-900">{result.maxForce.toLocaleString()}</span>
               </div>
               <div className="mt-2">
                 <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${
@@ -299,7 +334,7 @@ const App = () => {
             <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
               <div className="text-xs text-slate-600 mb-1">일일 용량 (kNh)</div>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-2xl font-bold text-slate-900">{(result.dailyDose / 1000).toFixed(2)}</span>
+                <span className="text-xl md:text-2xl font-bold text-slate-900">{(result.dailyDose / 1000).toFixed(2)}</span>
               </div>
               <div className="flex gap-2 text-xs">
                 <span className={`px-1.5 py-0.5 rounded ${
@@ -319,7 +354,7 @@ const App = () => {
             <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
               <div className="text-xs text-slate-600 mb-1">평생 용량 (MNh)</div>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-2xl font-bold text-slate-900">{(result.lifeDose / 1000000).toFixed(2)}</span>
+                <span className="text-xl md:text-2xl font-bold text-slate-900">{(result.lifeDose / 1000000).toFixed(2)}</span>
               </div>
               <div className="flex gap-2 text-xs">
                 <span className={`px-1.5 py-0.5 rounded ${
@@ -338,11 +373,13 @@ const App = () => {
         </div>
 
         {/* RIGHT MAIN EDITOR */}
-        <div className="flex-1 overflow-y-auto bg-slate-50">
+        <div className={`flex-1 overflow-y-auto bg-slate-50 ${
+          mobileTab === 'list' ? 'hidden md:block' : 'block'
+        }`}>
           {activeTask ? (
-            <div className="p-6">
+            <div className="p-3 md:p-6">
               {/* Editor Header */}
-              <div className="bg-white rounded-lg border border-slate-200 mb-4 p-4">
+              <div className="bg-white rounded-lg border border-slate-200 mb-3 md:mb-4 p-3 md:p-4">
                 <div className="flex items-center gap-2">
                   <span className="bg-slate-900 text-white px-2 py-1 rounded font-bold text-sm">
                     {activeTask.activity}
@@ -352,12 +389,21 @@ const App = () => {
                 <p className="text-sm text-slate-600 mt-1">
                   아래 항목을 수정하여 결과가 자동 계산됩니다.
                 </p>
+                {/* 모바일 뒤로가기 버튼 */}
+                <div className="md:hidden mt-2">
+                  <button
+                    onClick={() => setMobileTab('list')}
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                  >
+                    ← 작업 목록으로 돌아가기
+                  </button>
+                </div>
               </div>
 
               {/* Input Grid */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
                 {/* 중량물 무게 */}
-                <div className="bg-white rounded-lg border border-slate-200 p-4">
+                <div className="bg-white rounded-lg border border-slate-200 p-3 md:p-4">
                   <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-3">
                     <span className="text-slate-500">⚖️</span>
                     중량물 무게 (kg)
@@ -367,12 +413,12 @@ const App = () => {
                     min="0"
                     value={activeTask.weight}
                     onChange={(e) => updateTask(activeTask.id, 'weight', Number(e.target.value))}
-                    className="w-full px-3 py-2 border-2 border-slate-300 rounded text-2xl font-bold text-slate-900 bg-white text-center"
+                    className="w-full px-2 md:px-3 py-2 border-2 border-slate-300 rounded text-xl md:text-2xl font-bold text-slate-900 bg-white text-center"
                   />
                 </div>
 
                 {/* 단위 작업 시간 */}
-                <div className="bg-white rounded-lg border border-slate-200 p-4">
+                <div className="bg-white rounded-lg border border-slate-200 p-3 md:p-4">
                   <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-3">
                     <span className="text-slate-500">⏱️</span>
                     단위 작업 시간
@@ -384,7 +430,7 @@ const App = () => {
                       step="0.1"
                       value={activeTask.duration}
                       onChange={(e) => updateTask(activeTask.id, 'duration', Number(e.target.value))}
-                      className="flex-1 px-3 py-2 border-2 border-slate-300 rounded text-2xl font-bold text-slate-900 bg-white text-center"
+                      className="flex-1 px-2 md:px-3 py-2 border-2 border-slate-300 rounded text-xl md:text-2xl font-bold text-slate-900 bg-white text-center"
                     />
                     <select
                       value={activeTask.timeUnit}
@@ -399,7 +445,7 @@ const App = () => {
                 </div>
 
                 {/* 일일 반복 횟수 */}
-                <div className="bg-white rounded-lg border border-slate-200 p-4">
+                <div className="bg-white rounded-lg border border-slate-200 p-3 md:p-4">
                   <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-3">
                     <span className="text-slate-500">🔄</span>
                     일일 반복 (회)
@@ -409,7 +455,7 @@ const App = () => {
                     min="1"
                     value={activeTask.frequency}
                     onChange={(e) => updateTask(activeTask.id, 'frequency', Number(e.target.value))}
-                    className="w-full px-3 py-2 border-2 border-slate-300 rounded text-2xl font-bold text-slate-900 bg-white text-center"
+                    className="w-full px-2 md:px-3 py-2 border-2 border-slate-300 rounded text-xl md:text-2xl font-bold text-slate-900 bg-white text-center"
                   />
                   <div className="text-xs text-slate-500 mt-2 text-right">
                     = 일 {activeTask.totalHours?.toFixed(2)}시간 수행
@@ -418,7 +464,7 @@ const App = () => {
               </div>
 
               {/* 작업 자세 선택 */}
-              <div className="bg-white rounded-lg border border-slate-200 p-4 mb-6">
+              <div className="bg-white rounded-lg border border-slate-200 p-3 md:p-4 mb-4 md:mb-6">
                 <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-3">
                   <span className="text-slate-500">🧍</span>
                   작업 자세 선택
@@ -426,7 +472,7 @@ const App = () => {
                     현재: {activeTask.activity} ({activities[activeTask.activity].label})
                   </span>
                 </label>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                   {Object.values(activities).map((act) => {
                     const isSelected = activeTask.activity === act.code;
                     const hasTwoImages = act.imageStart && act.imageEnd;
@@ -436,22 +482,22 @@ const App = () => {
                       <button
                         key={act.code}
                         onClick={() => updateTask(activeTask.id, 'activity', act.code)}
-                        className={`border-2 rounded-lg p-3 transition-all ${
+                        className={`border-2 rounded-lg p-2 md:p-3 transition-all ${
                           isSelected
                             ? 'bg-slate-900 border-slate-900 shadow-lg'
                             : 'bg-white border-slate-200 hover:border-slate-400'
                         }`}
                       >
-                        <div className={`text-lg font-bold mb-3 text-center ${
+                        <div className={`text-base md:text-lg font-bold mb-2 md:mb-3 text-center ${
                           isSelected ? 'text-white' : 'text-slate-900'
                         }`}>
                           {act.code}
                         </div>
 
                         {/* Image Display */}
-                        <div className="bg-slate-100 rounded p-3 mb-3 border border-slate-200 min-h-[180px] flex items-center justify-center">
+                        <div className="bg-slate-100 rounded p-2 md:p-3 mb-2 md:mb-3 border border-slate-200 min-h-[120px] md:min-h-[180px] flex items-center justify-center">
                           {isG10 ? (
-                            <div className="flex gap-2 w-full h-[170px]">
+                            <div className="flex gap-2 w-full h-[110px] md:h-[170px]">
                               {act.imageStart && (
                                 <div className="flex-1 flex items-center justify-center">
                                   <img src={act.imageStart} alt={`${act.code}-left`} className="w-full h-full object-contain" />
@@ -464,7 +510,7 @@ const App = () => {
                               )}
                             </div>
                           ) : hasTwoImages ? (
-                            <div className="flex items-center gap-1 w-full h-[170px]">
+                            <div className="flex items-center gap-1 w-full h-[110px] md:h-[170px]">
                               {act.imageStart && (
                                 <div className="flex-1 flex items-center justify-center">
                                   <img src={act.imageStart} alt={`${act.code}-start`} className="w-full h-full object-contain" />
@@ -479,7 +525,7 @@ const App = () => {
                             </div>
                           ) : (
                             act.image && (
-                              <img src={act.image} alt={act.code} className="w-full max-h-[170px] object-contain px-2" />
+                              <img src={act.image} alt={act.code} className="w-full max-h-[110px] md:max-h-[170px] object-contain px-2" />
                             )
                           )}
                         </div>
@@ -496,7 +542,7 @@ const App = () => {
               </div>
 
               {/* 보정 계수 */}
-              <div className={`bg-white rounded-lg border border-slate-200 p-4 ${
+              <div className={`bg-white rounded-lg border border-slate-200 p-3 md:p-4 ${
                 activities[activeTask.activity].type !== 'lift' ? 'opacity-40 pointer-events-none' : ''
               }`}>
                 <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-3">
@@ -506,11 +552,11 @@ const App = () => {
                     {activities[activeTask.activity].type === 'lift' ? '최대치 1개 자동적용' : 'G1~G6만 적용'}
                   </span>
                 </label>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
                   {Object.values(correctionFactors).map(f => (
                     <label
                       key={f.code}
-                      className={`flex items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      className={`flex items-center gap-2 p-2 md:p-3 rounded-lg border-2 cursor-pointer transition-all ${
                         activeTask.factors.includes(f.code)
                           ? 'bg-slate-900 border-slate-900 text-white'
                           : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
