@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Calculator, CheckCircle, Activity, Plus, Trash2, ChevronDown, ChevronUp, PieChart } from 'lucide-react';
+import { Calculator, CheckCircle, Plus, Upload, Save } from 'lucide-react';
 import g1Start from './assets/G1_from.png';
 import g1End from './assets/G1_to.png';
 import g2Start from './assets/G2_from.png';
@@ -21,17 +21,17 @@ import g11Img from './assets/G11.png';
 
 const App = () => {
   const [tasks, setTasks] = useState([
-    { 
-      id: 1, 
-      weight: 10, 
-      activity: 'G1', 
-      factors: [], 
+    {
+      id: 1,
+      weight: 10,
+      activity: 'G3',
+      factors: [],
       duration: 10,
       timeUnit: 'sec',
       frequency: 360
     }
   ]);
-  
+
   const [daysPerYear, setDaysPerYear] = useState(220);
   const [workYears, setWorkYears] = useState(10);
   const [activeTaskId, setActiveTaskId] = useState(1);
@@ -53,8 +53,8 @@ const App = () => {
   const correctionFactors = {
     F1: { code: 'F1', val: 1.9, label: '한 손' },
     F2: { code: 'F2', val: 1.9, label: '비대칭' },
-    F3: { code: 'F3', val: 1.3, label: '몸에서 멀리 (똑바로~약간 굴곡)' },
-    F4: { code: 'F4', val: 1.1, label: '몸에서 멀리 (심한 굴곡)' }
+    F3: { code: 'F3', val: 1.3, label: '몸에서 멀리 (약간)' },
+    F4: { code: 'F4', val: 1.1, label: '몸에서 멀리 (심함)' }
   };
 
   const LIMITS = {
@@ -66,7 +66,7 @@ const App = () => {
   const calculateForce = (actCode, w, factors = []) => {
     const activity = activities[actCode];
     let factorVal = 1.0;
-    
+
     if (activity.type === 'lift' && factors.length > 0) {
        const vals = factors.map(f => correctionFactors[f]?.val || 1.0);
        factorVal = Math.max(...vals);
@@ -85,14 +85,14 @@ const App = () => {
   const addTask = () => {
     if (tasks.length >= 10) return;
     const newId = Math.max(...tasks.map(t => t.id)) + 1;
-    setTasks([...tasks, { 
-      id: newId, 
-      weight: 10, 
-      activity: 'G1', 
-      factors: [], 
-      duration: 10, 
-      timeUnit: 'sec', 
-      frequency: 100 
+    setTasks([...tasks, {
+      id: newId,
+      weight: 10,
+      activity: 'G1',
+      factors: [],
+      duration: 10,
+      timeUnit: 'sec',
+      frequency: 100
     }]);
     setActiveTaskId(newId);
   };
@@ -119,11 +119,11 @@ const App = () => {
   const result = useMemo(() => {
     let maxForce = 0;
     let sumForceSquaredTime = 0;
-    
+
     const tempResults = tasks.map(task => {
       const force = calculateForce(task.activity, task.weight, task.factors);
       if (force > maxForce) maxForce = force;
-      
+
       const totalHours = calculateTotalHours(task.duration, task.timeUnit, task.frequency);
       const squaredDose = Math.pow(force, 2) * totalHours;
       sumForceSquaredTime += squaredDose;
@@ -132,9 +132,9 @@ const App = () => {
     });
 
     const taskResults = tempResults.map(task => {
-      const individualDose = Math.sqrt(task.squaredDose); 
-      const percentage = sumForceSquaredTime > 0 
-        ? (task.squaredDose / sumForceSquaredTime) * 100 
+      const individualDose = Math.sqrt(task.squaredDose);
+      const percentage = sumForceSquaredTime > 0
+        ? (task.squaredDose / sumForceSquaredTime) * 100
         : 0;
       return { ...task, individualDose, percentage };
     });
@@ -150,265 +150,115 @@ const App = () => {
     };
   }, [tasks, daysPerYear, workYears]);
 
-  const matrixRows = [0, 5, 10, 15, 20, 25, 30, 40];
-  const matrixCols = ['G1', 'G2', 'G3', 'G7', 'G8', 'G9'];
-
-  const getRiskColor = (force) => {
-    if (force <= LIMITS.force.female) return 'bg-slate-200 text-black';
-    if (force <= LIMITS.force.male) return 'bg-amber-400 text-black font-semibold';
-    return 'bg-red-600 text-black font-bold';
-  };
+  const activeTask = tasks.find(t => t.id === activeTaskId);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        
-        <header className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <Activity className="text-blue-600" />
-              척추 압박력 & 누적 부하 평가 시뮬레이터
-            </h1>
-            <p className="text-slate-500 mt-1 text-sm">복합 작업(최대 10개) 평가 지원</p>
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* TOP HEADER */}
+      <div className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Calculator className="w-6 h-6 text-slate-700" />
+          <h1 className="text-lg font-bold text-slate-900">척추 압박력 시뮬레이터</h1>
+        </div>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 text-sm">
+            <Upload className="w-4 h-4 text-slate-600" />
+            <button className="text-slate-700 hover:text-slate-900">불러오기</button>
           </div>
-          <div className="flex gap-4 text-sm bg-slate-50 p-3 rounded-lg border border-slate-200">
-            <div>
-              <span className="block text-slate-500 text-xs">연간 근무일</span>
-              <input 
-                type="number" 
-                value={daysPerYear} 
-                onChange={(e) => setDaysPerYear(Number(e.target.value))}
-                className="w-16 bg-white border border-slate-300 rounded px-1 py-0.5"
-              /> 일
-            </div>
-            <div>
-              <span className="block text-slate-500 text-xs">근속 연수</span>
-              <input 
-                type="number" 
-                value={workYears} 
-                onChange={(e) => setWorkYears(Number(e.target.value))}
-                className="w-16 bg-white border border-slate-300 rounded px-1 py-0.5"
-              /> 년
-            </div>
+          <div className="flex items-center gap-2 text-sm">
+            <Save className="w-4 h-4 text-slate-600" />
+            <button className="text-slate-700 hover:text-slate-900">저장</button>
           </div>
-        </header>
+          <div className="h-6 w-px bg-slate-300"></div>
+          <div className="flex items-center gap-2 text-sm">
+            <label className="text-slate-600">연간 근무</label>
+            <input
+              type="number"
+              value={daysPerYear}
+              onChange={(e) => setDaysPerYear(Number(e.target.value))}
+              className="w-16 px-2 py-1 border border-slate-300 rounded text-slate-900 text-center"
+            />
+            <span className="text-slate-600">일</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <label className="text-slate-600">근속 연수</label>
+            <input
+              type="number"
+              value={workYears}
+              onChange={(e) => setWorkYears(Number(e.target.value))}
+              className="w-16 px-2 py-1 border border-slate-300 rounded text-slate-900 text-center"
+            />
+            <span className="text-slate-600">년</span>
+          </div>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-          
-          <div className="xl:col-span-5 space-y-4">
+      <div className="flex flex-1">
+        {/* LEFT SIDEBAR */}
+        <div className="w-96 bg-white border-r border-slate-200 flex flex-col">
+          {/* Task List Header */}
+          <div className="p-4 border-b border-slate-200">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <Calculator className="w-5 h-5" /> 작업 목록 ({tasks.length}/10)
+              <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                <span className="bg-slate-100 p-1 rounded">
+                  <Calculator className="w-4 h-4" />
+                </span>
+                작업 리스트
               </h2>
-              <button 
+              <button
                 onClick={addTask}
                 disabled={tasks.length >= 10}
-                className="text-sm flex items-center gap-1 bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-xs flex items-center gap-1 bg-white text-slate-700 px-2 py-1 rounded border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Plus className="w-4 h-4" /> 작업 추가
+                <Plus className="w-3 h-3" /> 추가
               </button>
             </div>
+          </div>
 
-            <div className="space-y-3">
-              {result.taskResults.map((task, index) => {
+          {/* Task List */}
+          <div className="overflow-y-auto p-3" style={{ maxHeight: 'calc(100vh - 550px)' }}>
+            <div className="space-y-2">
+              {result.taskResults.map((task) => {
                 const isActive = activeTaskId === task.id;
-                const activityInfo = activities[task.activity];
-                const isLift = activityInfo.type === 'lift';
 
                 return (
-                  <div key={task.id} className={`bg-white rounded-xl border transition-all duration-200 overflow-hidden ${isActive ? 'ring-2 ring-blue-500 border-transparent shadow-md' : 'border-slate-200 shadow-sm'}`}>
-                    <div 
-                      className="p-4 flex items-center justify-between cursor-pointer bg-slate-50 hover:bg-slate-100"
-                      onClick={() => setActiveTaskId(isActive ? null : task.id)}
-                    >
-                      <div className="flex items-center gap-3 flex-1">
-                        <span className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 shrink-0">{index + 1}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-sm text-slate-800 truncate">{task.activity} - {activityInfo.label}</div>
-                          <div className="text-xs text-slate-500 mt-0.5">
-                            {task.weight}kg | {task.totalHours.toFixed(2)} hr
-                          </div>
+                  <div
+                    key={task.id}
+                    className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
+                      isActive
+                        ? 'bg-slate-900 border-slate-900 text-white'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
+                    }`}
+                    onClick={() => setActiveTaskId(task.id)}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <div className={`font-bold text-sm ${isActive ? 'text-white' : 'text-slate-900'}`}>
+                          {task.activity}
+                        </div>
+                        <div className={`text-xs mt-1 ${isActive ? 'text-slate-300' : 'text-slate-500'}`}>
+                          무게: {task.weight}kg
+                        </div>
+                        <div className={`text-xs ${isActive ? 'text-slate-300' : 'text-slate-500'}`}>
+                          시간: {task.totalHours.toFixed(2)}hr
                         </div>
                       </div>
-                      
-                      <div className="text-right mr-3 pl-3 border-l border-slate-200 min-w-[90px]">
-                        <div className="text-sm font-bold text-blue-600">
-                          {(task.individualDose / 1000).toFixed(3)} kNh
+                      <div className="text-right">
+                        <div className={`text-sm font-bold ${isActive ? 'text-white' : 'text-slate-900'}`}>
+                          {(task.individualDose / 1000).toFixed(2)} kNh
                         </div>
-                        <div className="text-xs text-slate-500 flex items-center justify-end gap-1 mt-0.5">
-                          <PieChart className="w-3.5 h-3.5" />
-                          {task.percentage.toFixed(1)}% 기여
+                        <div className={`text-xs ${isActive ? 'text-slate-300' : 'text-slate-500'}`}>
+                          {task.percentage.toFixed(1)}%
                         </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 pl-2">
-                        {tasks.length > 1 && (
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); removeTask(task.id); }}
-                            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                        {isActive ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                       </div>
                     </div>
-
-                    {isActive && (
-                      <div className="p-4 border-t border-slate-100 space-y-4 bg-white">
-                        
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-1">중량물 무게 (kg)</label>
-                          <input 
-                            type="number" 
-                            min="0" 
-                            value={task.weight}
-                            onChange={(e) => updateTask(task.id, 'weight', Number(e.target.value))}
-                            className="w-full p-2 border border-slate-300 rounded text-sm"
-                          />
-                        </div>
-
-                        <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
-                          <div className="grid grid-cols-2 gap-2 mb-1">
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-500 mb-1">수행 시간</label>
-                              <div className="flex gap-1">
-                                <input 
-                                  type="number" 
-                                  min="0" 
-                                  step="0.1" 
-                                  value={task.duration}
-                                  onChange={(e) => updateTask(task.id, 'duration', Number(e.target.value))}
-                                  className="w-full p-1.5 border border-slate-300 rounded text-xs"
-                                />
-                                <select 
-                                  value={task.timeUnit}
-                                  onChange={(e) => updateTask(task.id, 'timeUnit', e.target.value)}
-                                  className="p-1.5 border border-slate-300 rounded text-xs bg-white"
-                                >
-                                  <option value="sec">초</option>
-                                  <option value="min">분</option>
-                                  <option value="hr">시간</option>
-                                </select>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-xs font-semibold text-slate-500 mb-1">작업 횟수</label>
-                              <input 
-                                type="number" 
-                                min="1" 
-                                value={task.frequency}
-                                onChange={(e) => updateTask(task.id, 'frequency', Number(e.target.value))}
-                                className="w-full p-1.5 border border-slate-300 rounded text-xs"
-                              />
-                            </div>
-                          </div>
-                          <div className="text-xs text-blue-600 font-bold bg-blue-50 p-1.5 rounded flex justify-between">
-                            <span>총 작업 시간:</span>
-                            <span>{task.totalHours.toFixed(4)} 시간</span>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-500 mb-2">작업 자세</label>
-                          <div className="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto border rounded p-2 bg-slate-50">
-                            {Object.values(activities).map((act) => {
-                              const hasTwoImages = act.imageStart && act.imageEnd;
-                              const isG10 = act.code === 'G10';
-                              const labelParts = act.label.split('→').map(s => s.trim());
-
-                              return (
-                                <button
-                                  key={act.code}
-                                  onClick={() => updateTask(task.id, 'activity', act.code)}
-                                  className={`flex items-center gap-4 text-left p-3 rounded-lg border ${
-                                    task.activity === act.code
-                                      ? 'bg-blue-100 border-blue-300 text-blue-700 font-bold shadow-sm'
-                                      : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600'
-                                  }`}
-                                >
-                                  <div className="text-2xl font-bold shrink-0">{act.code}</div>
-
-                                  {isG10 ? (
-                                    <div className="flex flex-col items-center flex-1">
-                                      <div className="bg-slate-200 rounded flex items-center justify-center gap-1 p-2">
-                                        {act.imageStart && (
-                                          <img src={act.imageStart} alt={`${act.code}-left`} className="max-w-[250px] max-h-[250px] w-auto h-auto object-contain" />
-                                        )}
-                                        {act.imageEnd && (
-                                          <img src={act.imageEnd} alt={`${act.code}-right`} className="max-w-[250px] max-h-[250px] w-auto h-auto object-contain" />
-                                        )}
-                                      </div>
-                                      <div className="text-xs mt-1 text-center font-medium">{act.label}</div>
-                                    </div>
-                                  ) : hasTwoImages ? (
-                                    <div className="flex gap-3 flex-1">
-                                      <div className="flex flex-col items-center">
-                                        <div className="bg-slate-200 rounded flex items-center justify-center p-2">
-                                          {act.imageStart ? (
-                                            <img src={act.imageStart} alt={`${act.code}-시작`} className="max-w-[128px] max-h-[128px] w-auto h-auto object-contain" />
-                                          ) : (
-                                            <span className="text-xs text-slate-400">이미지1</span>
-                                          )}
-                                        </div>
-                                        <div className="text-xs mt-1 text-center font-medium">{labelParts[0]}</div>
-                                      </div>
-
-                                      <div className="flex items-center text-xl font-bold text-slate-400">→</div>
-
-                                      <div className="flex flex-col items-center">
-                                        <div className="bg-slate-200 rounded flex items-center justify-center p-2">
-                                          {act.imageEnd ? (
-                                            <img src={act.imageEnd} alt={`${act.code}-끝`} className="max-w-[128px] max-h-[128px] w-auto h-auto object-contain" />
-                                          ) : (
-                                            <span className="text-xs text-slate-400">이미지2</span>
-                                          )}
-                                        </div>
-                                        <div className="text-xs mt-1 text-center font-medium">{labelParts[1]}</div>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <div className="flex flex-col items-center flex-1">
-                                      <div className="bg-slate-200 rounded flex items-center justify-center p-2">
-                                        {act.image ? (
-                                          <img
-                                            src={act.image}
-                                            alt={act.code}
-                                            className="max-w-[300px] max-h-[300px] w-auto h-auto object-contain"
-                                          />
-                                        ) : (
-                                          <span className="text-sm text-slate-400">이미지</span>
-                                        )}
-                                      </div>
-                                      <div className="text-xs mt-1 text-center font-medium">{act.label}</div>
-                                    </div>
-                                  )}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        <div className={`space-y-2 ${!isLift ? 'opacity-40 pointer-events-none' : ''}`}>
-                          <label className="block text-xs font-semibold text-slate-500">
-                            보정 계수 {isLift ? '(최대값 1개 자동적용)' : '(G1~G6만 적용)'}
-                          </label>
-                          <div className="grid grid-cols-1 gap-1">
-                            {Object.values(correctionFactors).map(f => (
-                              <label key={f.code} className={`flex items-center p-2 rounded border cursor-pointer ${task.factors.includes(f.code) ? 'bg-orange-50 border-orange-200' : 'border-slate-100'}`}>
-                                <input 
-                                  type="checkbox" 
-                                  checked={task.factors.includes(f.code)}
-                                  onChange={() => toggleFactor(task.id, f.code)}
-                                  disabled={!isLift}
-                                  className="w-3.5 h-3.5 text-orange-600 rounded"
-                                />
-                                <span className="ml-2 text-xs text-slate-700">{f.code} {f.label} (x{f.val})</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
+                    {tasks.length > 1 && !isActive && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); removeTask(task.id); }}
+                        className="text-xs text-slate-400 hover:text-red-600 mt-1"
+                      >
+                        삭제
+                      </button>
                     )}
                   </div>
                 );
@@ -416,123 +266,278 @@ const App = () => {
             </div>
           </div>
 
-          <div className="xl:col-span-7 space-y-6">
-            
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-              <div className="bg-slate-50 p-6 text-black">
-                <h2 className="text-sm font-bold text-black uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4" /> 종합 평가 결과
-                </h2>
+          {/* Summary Cards */}
+          <div className="p-4 border-t border-slate-200 space-y-2">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="bg-slate-100 p-1 rounded">
+                <CheckCircle className="w-4 h-4" />
+              </span>
+              <h3 className="text-sm font-bold text-slate-800">종합 분석</h3>
+              <button className="ml-auto text-xs text-blue-600 hover:underline">남여 기준</button>
+            </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-
-                  <div>
-                    <div className="text-xs text-black mb-1">최대 단일 압박력</div>
-                    <div className="flex items-end gap-1 mb-2">
-                      <span className="text-4xl font-bold">{result.maxForce.toLocaleString()}</span>
-                      <span className="text-base text-slate-700 mb-1">N</span>
-                    </div>
-                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${result.maxForce > LIMITS.force.male ? 'bg-red-500 text-black' : result.maxForce > LIMITS.force.female ? 'bg-amber-500 text-black' : 'bg-green-600 text-black'}`}>
-                      {result.maxForce > LIMITS.force.male ? '위험' : result.maxForce > LIMITS.force.female ? '주의' : '안전'}
-                    </span>
-                  </div>
-
-                  <div className="border-l border-slate-300 pl-8">
-                    <div className="text-xs text-black mb-1">총 일일 용량</div>
-                    <div className="flex items-end gap-1 mb-2">
-                      <span className="text-3xl font-bold">{(result.dailyDose / 1000).toFixed(3)}</span>
-                      <span className="text-sm text-slate-700 mb-1">kNh</span>
-                    </div>
-                    <div className="flex flex-col text-xs gap-0.5">
-                      <span className={result.dailyDose > LIMITS.daily.male ? 'text-red-600 font-bold' : 'text-black'}>
-                        남: {result.dailyDose > LIMITS.daily.male ? '초과' : '적합'} (2.0)
-                      </span>
-                      <span className={result.dailyDose > LIMITS.daily.female ? 'text-amber-600 font-bold' : 'text-black'}>
-                        여: {result.dailyDose > LIMITS.daily.female ? '초과' : '적합'} (0.5)
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="border-l border-slate-300 pl-8">
-                    <div className="text-xs text-black mb-1">평생 용량</div>
-                    <div className="flex items-end gap-1 mb-2">
-                      <span className="text-3xl font-bold">{(result.lifeDose / 1000000).toFixed(3)}</span>
-                      <span className="text-sm text-slate-700 mb-1">MNh</span>
-                    </div>
-                    <div className="flex flex-col text-xs gap-0.5">
-                      <span className={result.lifeDose > LIMITS.life.male ? 'text-red-600 font-bold' : 'text-black'}>
-                        남: {result.lifeDose > LIMITS.life.male ? '초과' : '적합'} (7)
-                      </span>
-                      <span className={result.lifeDose > LIMITS.life.female ? 'text-amber-600 font-bold' : 'text-black'}>
-                        여: {result.lifeDose > LIMITS.life.female ? '초과' : '적합'} (3)
-                      </span>
-                    </div>
-                  </div>
-                </div>
+            {/* 최대 압박력 */}
+            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+              <div className="text-xs text-slate-600 mb-1">최대 압박력 (N)</div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-bold text-slate-900">{result.maxForce.toLocaleString()}</span>
               </div>
-
-              <div className="bg-slate-50 p-4 border-t border-slate-200 text-xs text-slate-500">
-                <p className="mb-1"><strong>[계산 로직]</strong></p>
-                <p>1. 작업 시간(hr) = 단위작업시간 × 횟수 × 환산계수</p>
-                <p>2. Daily Dose = √[ Σ(작업별 압박력² × 작업시간) ]</p>
-                <p>3. Lifetime Dose = Daily Dose × {daysPerYear}일 × {workYears}년</p>
+              <div className="mt-2">
+                <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${
+                  result.maxForce > LIMITS.force.male
+                    ? 'bg-red-200 text-slate-900 border border-red-400'
+                    : result.maxForce > LIMITS.force.female
+                    ? 'bg-yellow-200 text-slate-900 border border-yellow-400'
+                    : 'bg-slate-200 text-slate-900 border border-slate-300'
+                }`}>
+                  {result.maxForce > LIMITS.force.male ? '위험' : result.maxForce > LIMITS.force.female ? '주의' : '안전'}
+                </span>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="p-4 bg-slate-50 border-b border-slate-200">
-                <h3 className="font-bold text-black">
-                  단일 압박력 참조표
-                  <span className="text-xs font-normal text-black bg-white px-2 py-0.5 rounded border ml-2">주요 자세 6종</span>
-                </h3>
-                <div className="flex gap-4 mt-2 text-xs text-black">
-                  <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 bg-slate-200 rounded-sm"></span> ≤ 2.0kN (안전)
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 bg-amber-400 rounded-sm"></span> ~ 2.7kN (주의)
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 bg-red-400 rounded-sm"></span> &gt; 2.7kN (위험)
-                  </span>
-                </div>
+            {/* 일일 용량 */}
+            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+              <div className="text-xs text-slate-600 mb-1">일일 용량 (kNh)</div>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-2xl font-bold text-slate-900">{(result.dailyDose / 1000).toFixed(2)}</span>
               </div>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-center border-collapse">
-                  <thead>
-                    <tr>
-                      <th className="p-3 bg-slate-300 text-black font-medium min-w-[60px] text-xs">Weight</th>
-                      {matrixCols.map((col, idx) => (
-                        <th key={idx} className="p-3 bg-slate-300 text-black font-medium border-l border-slate-400 min-w-[70px] text-xs">
-                          {col}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {matrixRows.map((rWeight) => (
-                      <tr key={rWeight} className="hover:bg-slate-50">
-                        <td className="p-2 font-bold border-b bg-slate-100 text-black text-xs">
-                          {rWeight} kg
-                        </td>
-                        {matrixCols.map((col, cIdx) => {
-                          const f = calculateForce(col, rWeight, []);
-                          const colorClass = getRiskColor(f);
-                          return (
-                            <td key={cIdx} className={`p-2 border-b border-l border-white/50 text-xs ${colorClass}`}>
-                              {(f / 1000).toFixed(1)}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="flex gap-2 text-xs">
+                <span className={`px-1.5 py-0.5 rounded ${
+                  result.dailyDose > LIMITS.daily.male ? 'bg-red-100 text-red-700 border border-red-300' : 'bg-slate-100 text-slate-600'
+                }`}>
+                  남 {result.dailyDose > LIMITS.daily.male ? '초과' : '적합'}
+                </span>
+                <span className={`px-1.5 py-0.5 rounded ${
+                  result.dailyDose > LIMITS.daily.female ? 'bg-red-100 text-red-700 border border-red-300' : 'bg-slate-100 text-slate-600'
+                }`}>
+                  여 {result.dailyDose > LIMITS.daily.female ? '초과' : '적합'}
+                </span>
               </div>
             </div>
 
+            {/* 평생 용량 */}
+            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+              <div className="text-xs text-slate-600 mb-1">평생 용량 (MNh)</div>
+              <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-2xl font-bold text-slate-900">{(result.lifeDose / 1000000).toFixed(2)}</span>
+              </div>
+              <div className="flex gap-2 text-xs">
+                <span className={`px-1.5 py-0.5 rounded ${
+                  result.lifeDose > LIMITS.life.male ? 'bg-red-100 text-red-700 border border-red-300' : 'bg-slate-100 text-slate-600'
+                }`}>
+                  남 {result.lifeDose > LIMITS.life.male ? '초과' : '적합'}
+                </span>
+                <span className={`px-1.5 py-0.5 rounded ${
+                  result.lifeDose > LIMITS.life.female ? 'bg-red-100 text-red-700 border border-red-300' : 'bg-slate-100 text-slate-600'
+                }`}>
+                  여 {result.lifeDose > LIMITS.life.female ? '초과' : '적합'}
+                </span>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* RIGHT MAIN EDITOR */}
+        <div className="flex-1 overflow-y-auto bg-slate-50">
+          {activeTask ? (
+            <div className="p-6">
+              {/* Editor Header */}
+              <div className="bg-white rounded-lg border border-slate-200 mb-4 p-4">
+                <div className="flex items-center gap-2">
+                  <span className="bg-slate-900 text-white px-2 py-1 rounded font-bold text-sm">
+                    {activeTask.activity}
+                  </span>
+                  <h2 className="text-base font-bold text-slate-900">작업 상세 설정</h2>
+                </div>
+                <p className="text-sm text-slate-600 mt-1">
+                  아래 항목을 수정하여 결과가 자동 계산됩니다.
+                </p>
+              </div>
+
+              {/* Input Grid */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                {/* 중량물 무게 */}
+                <div className="bg-white rounded-lg border border-slate-200 p-4">
+                  <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-3">
+                    <span className="text-slate-500">⚖️</span>
+                    중량물 무게 (kg)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={activeTask.weight}
+                    onChange={(e) => updateTask(activeTask.id, 'weight', Number(e.target.value))}
+                    className="w-full px-3 py-2 border-2 border-slate-300 rounded text-2xl font-bold text-slate-900 bg-white text-center"
+                  />
+                </div>
+
+                {/* 단위 작업 시간 */}
+                <div className="bg-white rounded-lg border border-slate-200 p-4">
+                  <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-3">
+                    <span className="text-slate-500">⏱️</span>
+                    단위 작업 시간
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={activeTask.duration}
+                      onChange={(e) => updateTask(activeTask.id, 'duration', Number(e.target.value))}
+                      className="flex-1 px-3 py-2 border-2 border-slate-300 rounded text-2xl font-bold text-slate-900 bg-white text-center"
+                    />
+                    <select
+                      value={activeTask.timeUnit}
+                      onChange={(e) => updateTask(activeTask.id, 'timeUnit', e.target.value)}
+                      className="w-20 px-3 py-2 border-2 border-slate-300 rounded text-sm font-semibold text-slate-900 bg-white"
+                    >
+                      <option value="sec">초</option>
+                      <option value="min">분</option>
+                      <option value="hr">시간</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* 일일 반복 횟수 */}
+                <div className="bg-white rounded-lg border border-slate-200 p-4">
+                  <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-3">
+                    <span className="text-slate-500">🔄</span>
+                    일일 반복 (회)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={activeTask.frequency}
+                    onChange={(e) => updateTask(activeTask.id, 'frequency', Number(e.target.value))}
+                    className="w-full px-3 py-2 border-2 border-slate-300 rounded text-2xl font-bold text-slate-900 bg-white text-center"
+                  />
+                  <div className="text-xs text-slate-500 mt-2 text-right">
+                    = 일 {activeTask.totalHours?.toFixed(2)}시간 수행
+                  </div>
+                </div>
+              </div>
+
+              {/* 작업 자세 선택 */}
+              <div className="bg-white rounded-lg border border-slate-200 p-4 mb-6">
+                <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-3">
+                  <span className="text-slate-500">🧍</span>
+                  작업 자세 선택
+                  <span className="ml-auto text-xs font-normal bg-slate-900 text-white px-2 py-1 rounded">
+                    현재: {activeTask.activity} ({activities[activeTask.activity].label})
+                  </span>
+                </label>
+                <div className="grid grid-cols-3 gap-4">
+                  {Object.values(activities).map((act) => {
+                    const isSelected = activeTask.activity === act.code;
+                    const hasTwoImages = act.imageStart && act.imageEnd;
+                    const isG10 = act.code === 'G10';
+
+                    return (
+                      <button
+                        key={act.code}
+                        onClick={() => updateTask(activeTask.id, 'activity', act.code)}
+                        className={`border-2 rounded-lg p-3 transition-all ${
+                          isSelected
+                            ? 'bg-slate-900 border-slate-900 shadow-lg'
+                            : 'bg-white border-slate-200 hover:border-slate-400'
+                        }`}
+                      >
+                        <div className={`text-lg font-bold mb-3 text-center ${
+                          isSelected ? 'text-white' : 'text-slate-900'
+                        }`}>
+                          {act.code}
+                        </div>
+
+                        {/* Image Display */}
+                        <div className="bg-slate-100 rounded p-3 mb-3 border border-slate-200 min-h-[180px] flex items-center justify-center">
+                          {isG10 ? (
+                            <div className="flex gap-2 w-full h-[170px]">
+                              {act.imageStart && (
+                                <div className="flex-1 flex items-center justify-center">
+                                  <img src={act.imageStart} alt={`${act.code}-left`} className="w-full h-full object-contain" />
+                                </div>
+                              )}
+                              {act.imageEnd && (
+                                <div className="flex-1 flex items-center justify-center">
+                                  <img src={act.imageEnd} alt={`${act.code}-right`} className="w-full h-full object-contain" />
+                                </div>
+                              )}
+                            </div>
+                          ) : hasTwoImages ? (
+                            <div className="flex items-center gap-1 w-full h-[170px]">
+                              {act.imageStart && (
+                                <div className="flex-1 flex items-center justify-center">
+                                  <img src={act.imageStart} alt={`${act.code}-start`} className="w-full h-full object-contain" />
+                                </div>
+                              )}
+                              <span className="text-lg text-slate-400 font-bold shrink-0">→</span>
+                              {act.imageEnd && (
+                                <div className="flex-1 flex items-center justify-center">
+                                  <img src={act.imageEnd} alt={`${act.code}-end`} className="w-full h-full object-contain" />
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            act.image && (
+                              <img src={act.image} alt={act.code} className="w-full max-h-[170px] object-contain px-2" />
+                            )
+                          )}
+                        </div>
+
+                        <div className={`text-xs text-center leading-tight ${
+                          isSelected ? 'text-slate-300' : 'text-slate-600'
+                        }`}>
+                          {act.label}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 보정 계수 */}
+              <div className={`bg-white rounded-lg border border-slate-200 p-4 ${
+                activities[activeTask.activity].type !== 'lift' ? 'opacity-40 pointer-events-none' : ''
+              }`}>
+                <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-3">
+                  <span className="text-slate-500">⚠️</span>
+                  보정 계수
+                  <span className="text-xs font-normal text-slate-500">
+                    {activities[activeTask.activity].type === 'lift' ? '최대치 1개 자동적용' : 'G1~G6만 적용'}
+                  </span>
+                </label>
+                <div className="grid grid-cols-4 gap-3">
+                  {Object.values(correctionFactors).map(f => (
+                    <label
+                      key={f.code}
+                      className={`flex items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                        activeTask.factors.includes(f.code)
+                          ? 'bg-slate-900 border-slate-900 text-white'
+                          : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={activeTask.factors.includes(f.code)}
+                        onChange={() => toggleFactor(activeTask.id, f.code)}
+                        disabled={activities[activeTask.activity].type !== 'lift'}
+                        className="w-4 h-4 rounded"
+                      />
+                      <div className="flex-1">
+                        <div className="text-sm font-bold">{f.code}</div>
+                        <div className="text-xs opacity-80">{f.label}</div>
+                        <div className="text-xs font-mono opacity-60">({f.val})</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-slate-500">왼쪽에서 작업을 선택하세요</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
