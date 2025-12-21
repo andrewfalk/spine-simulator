@@ -3,30 +3,59 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "dev:app": "concurrently -k \"vite\" \"wait-on http://127.0.0.1:5173 && electron .\"",
+    "build:web": "vite build --mode web",
+    "build:electron": "vite build --mode electron",
+    "build:app": "npm run build:electron && electron-builder",
+    "build:app:win7-ia32": "npm run build:electron && electron-builder --win --ia32",
+    "build:offline": "vite build --mode offline",
+
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:web": "vite preview --outDir docs --base /spine-simulator/ --port 4173 --open"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.17",
     "lucide-react": "^0.556.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@tailwindcss/vite": "^4.1.17",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.22",
+    "concurrently": "^9.0.0",
+    "electron": "^22.3.27",
+    "electron-builder": "26.3.6",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "wait-on": "^8.0.0"
+  },
+  "build": {
+    "appId": "com.yourcompany.spinesimulator",
+    "productName": "Spine Simulator",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist-electron/**",
+      "electron/**",
+      "package.json"
+    ],
+    "npmRebuild": false,
+    "win": {
+      "target": "nsis",
+      "artifactName": "${productName} Setup ${version} ${arch}.exe"
+    }
   }
 }

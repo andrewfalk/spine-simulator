@@ -154,9 +154,9 @@ const App = () => {
   const matrixCols = ['G1', 'G2', 'G3', 'G7', 'G8', 'G9'];
 
   const getRiskColor = (force) => {
-    if (force <= LIMITS.force.female) return 'bg-slate-200 text-slate-700';
-    if (force <= LIMITS.force.male) return 'bg-amber-400 text-slate-900 font-semibold';
-    return 'bg-red-600 text-white font-bold';
+    if (force <= LIMITS.force.female) return 'bg-slate-200 text-black';
+    if (force <= LIMITS.force.male) return 'bg-amber-400 text-black font-semibold';
+    return 'bg-red-600 text-black font-bold';
   };
 
   return (
@@ -419,51 +419,51 @@ const App = () => {
           <div className="xl:col-span-7 space-y-6">
             
             <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-              <div className="bg-slate-900 p-6 text-white">
-                <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <div className="bg-slate-50 p-6 text-black">
+                <h2 className="text-sm font-bold text-black uppercase tracking-wider mb-4 flex items-center gap-2">
                   <CheckCircle className="w-4 h-4" /> 종합 평가 결과
                 </h2>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                  
+
                   <div>
-                    <div className="text-xs text-slate-400 mb-1">최대 단일 압박력</div>
+                    <div className="text-xs text-black mb-1">최대 단일 압박력</div>
                     <div className="flex items-end gap-1 mb-2">
                       <span className="text-4xl font-bold">{result.maxForce.toLocaleString()}</span>
-                      <span className="text-base text-slate-500 mb-1">N</span>
+                      <span className="text-base text-slate-700 mb-1">N</span>
                     </div>
-                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${result.maxForce > LIMITS.force.male ? 'bg-red-500' : result.maxForce > LIMITS.force.female ? 'bg-amber-500' : 'bg-green-600'}`}>
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${result.maxForce > LIMITS.force.male ? 'bg-red-500 text-black' : result.maxForce > LIMITS.force.female ? 'bg-amber-500 text-black' : 'bg-green-600 text-black'}`}>
                       {result.maxForce > LIMITS.force.male ? '위험' : result.maxForce > LIMITS.force.female ? '주의' : '안전'}
                     </span>
                   </div>
 
-                  <div className="border-l border-slate-700 pl-8">
-                    <div className="text-xs text-slate-400 mb-1">총 일일 용량</div>
+                  <div className="border-l border-slate-300 pl-8">
+                    <div className="text-xs text-black mb-1">총 일일 용량</div>
                     <div className="flex items-end gap-1 mb-2">
                       <span className="text-3xl font-bold">{(result.dailyDose / 1000).toFixed(3)}</span>
-                      <span className="text-sm text-slate-500 mb-1">kNh</span>
+                      <span className="text-sm text-slate-700 mb-1">kNh</span>
                     </div>
                     <div className="flex flex-col text-xs gap-0.5">
-                      <span className={result.dailyDose > LIMITS.daily.male ? 'text-red-400 font-bold' : 'text-slate-500'}>
+                      <span className={result.dailyDose > LIMITS.daily.male ? 'text-red-600 font-bold' : 'text-black'}>
                         남: {result.dailyDose > LIMITS.daily.male ? '초과' : '적합'} (2.0)
                       </span>
-                      <span className={result.dailyDose > LIMITS.daily.female ? 'text-amber-400 font-bold' : 'text-slate-500'}>
+                      <span className={result.dailyDose > LIMITS.daily.female ? 'text-amber-600 font-bold' : 'text-black'}>
                         여: {result.dailyDose > LIMITS.daily.female ? '초과' : '적합'} (0.5)
                       </span>
                     </div>
                   </div>
 
-                  <div className="border-l border-slate-700 pl-8">
-                    <div className="text-xs text-slate-400 mb-1">평생 용량</div>
+                  <div className="border-l border-slate-300 pl-8">
+                    <div className="text-xs text-black mb-1">평생 용량</div>
                     <div className="flex items-end gap-1 mb-2">
                       <span className="text-3xl font-bold">{(result.lifeDose / 1000000).toFixed(3)}</span>
-                      <span className="text-sm text-slate-500 mb-1">MNh</span>
+                      <span className="text-sm text-slate-700 mb-1">MNh</span>
                     </div>
                     <div className="flex flex-col text-xs gap-0.5">
-                      <span className={result.lifeDose > LIMITS.life.male ? 'text-red-400 font-bold' : 'text-slate-500'}>
+                      <span className={result.lifeDose > LIMITS.life.male ? 'text-red-600 font-bold' : 'text-black'}>
                         남: {result.lifeDose > LIMITS.life.male ? '초과' : '적합'} (7)
                       </span>
-                      <span className={result.lifeDose > LIMITS.life.female ? 'text-amber-400 font-bold' : 'text-slate-500'}>
+                      <span className={result.lifeDose > LIMITS.life.female ? 'text-amber-600 font-bold' : 'text-black'}>
                         여: {result.lifeDose > LIMITS.life.female ? '초과' : '적합'} (3)
                       </span>
                     </div>
@@ -481,11 +481,11 @@ const App = () => {
 
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
               <div className="p-4 bg-slate-50 border-b border-slate-200">
-                <h3 className="font-bold text-slate-800">
+                <h3 className="font-bold text-black">
                   단일 압박력 참조표
-                  <span className="text-xs font-normal text-slate-500 bg-white px-2 py-0.5 rounded border ml-2">주요 자세 6종</span>
+                  <span className="text-xs font-normal text-black bg-white px-2 py-0.5 rounded border ml-2">주요 자세 6종</span>
                 </h3>
-                <div className="flex gap-4 mt-2 text-xs">
+                <div className="flex gap-4 mt-2 text-xs text-black">
                   <span className="flex items-center gap-1">
                     <span className="w-3 h-3 bg-slate-200 rounded-sm"></span> ≤ 2.0kN (안전)
                   </span>
@@ -493,7 +493,7 @@ const App = () => {
                     <span className="w-3 h-3 bg-amber-400 rounded-sm"></span> ~ 2.7kN (주의)
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 bg-red-600 rounded-sm"></span> &gt; 2.7kN (위험)
+                    <span className="w-3 h-3 bg-red-400 rounded-sm"></span> &gt; 2.7kN (위험)
                   </span>
                 </div>
               </div>
@@ -502,9 +502,9 @@ const App = () => {
                 <table className="w-full text-sm text-center border-collapse">
                   <thead>
                     <tr>
-                      <th className="p-3 bg-slate-800 text-white font-medium min-w-[60px] text-xs">Weight</th>
+                      <th className="p-3 bg-slate-300 text-black font-medium min-w-[60px] text-xs">Weight</th>
                       {matrixCols.map((col, idx) => (
-                        <th key={idx} className="p-3 bg-cyan-900 text-white font-medium border-l border-cyan-800 min-w-[70px] text-xs">
+                        <th key={idx} className="p-3 bg-slate-300 text-black font-medium border-l border-slate-400 min-w-[70px] text-xs">
                           {col}
                         </th>
                       ))}
@@ -513,7 +513,7 @@ const App = () => {
                   <tbody>
                     {matrixRows.map((rWeight) => (
                       <tr key={rWeight} className="hover:bg-slate-50">
-                        <td className="p-2 font-bold border-b bg-slate-100 text-slate-700 text-xs">
+                        <td className="p-2 font-bold border-b bg-slate-100 text-black text-xs">
                           {rWeight} kg
                         </td>
                         {matrixCols.map((col, cIdx) => {
