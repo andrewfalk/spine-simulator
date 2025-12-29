@@ -107,7 +107,7 @@ const POSE_DB = {
 const CORRECTION_FACTORS = [
   { code: 'NONE', name: '보정 없음', value: 1.0 },
   { code: 'F1', name: '한 손 작업(1.9)', value: 1.9 },
-  { code: 'F2', name: '비대칭 작업(1.9)', value: 1.9 },
+  { code: 'F2', name: '비대칭, 허리 회전 작업(1.9)', value: 1.9 },
   { code: 'F3', name: '몸에서 멀리-똑바로~약간(1.3)', value: 1.3 },
   { code: 'F4', name: '몸에서 멀리-심한 굴곡(1.1)', value: 1.1 },
 ];
@@ -1015,17 +1015,19 @@ ${styleInstruction}
                       <div key={std.key} className="relative">
                         <div className="flex justify-between text-xs mb-1.5">
                           <span className="font-medium text-gray-600">{std.label} 기준 ({threshold} MN·h)</span>
-                          <span className={`font-bold ${risk.color}`}>{risk.label}</span>
+                          <span className={`font-bold ${risk.color}`}>
+                            {rawRatio.toFixed(0)}% ({risk.label})
+                          </span>
                         </div>
                         <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden shadow-inner">
-                          <div 
-                            className={`h-3 rounded-full ${risk.bar}`} 
+                          <div
+                            className={`h-3 rounded-full ${risk.bar}`}
                             style={{ width: `${widthPercent}%` }}
                           ></div>
                         </div>
                         {/* Current Value Marker if in range */}
-                        <div 
-                          className="absolute top-0 bottom-0 w-0.5 bg-black h-5 mt-4 opacity-30 z-10" 
+                        <div
+                          className="absolute top-0 bottom-0 w-0.5 bg-black h-5 mt-4 opacity-30 z-10"
                           style={{ left: `${widthPercent}%`, display: rawRatio > 100 ? 'none' : 'block' }}
                         />
                       </div>
