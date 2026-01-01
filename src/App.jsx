@@ -26,8 +26,8 @@ import {
   X
 } from 'lucide-react';
 
-// --- Gemini API Key Configuration ---
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY; // The execution environment provides the key at runtime.
+// --- Gemini API Configuration (now handled by Vercel serverless function) ---
+// API key is securely stored in Vercel environment variables
 
 // --- Constants & Data Models ---
 
@@ -377,12 +377,6 @@ export default function App() {
   const generateGeminiAssessment = async () => {
     if (!results) return;
 
-    // API 키 확인
-    if (!apiKey || apiKey === 'your_api_key_here') {
-      alert('Gemini API 키가 설정되지 않았습니다.\n\n.env 파일에 VITE_GEMINI_API_KEY를 설정해주세요.\n\n자세한 내용은 .env.example 파일을 참고하세요.');
-      return;
-    }
-
     setIsAiLoading(true);
 
     try {
@@ -447,15 +441,19 @@ ${styleInstruction}
 - 최종적으로 업무관련성이 '높음(상당 인과관계)', '가능성 있음(회색지대)', '낮음' 중 어디에 해당하는지 명확히 결론 내릴 것.
         `;
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+        // Call Vercel serverless function instead of direct API call
+        const response = await fetch('/api/generate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-            })
+            body: JSON.stringify({ prompt })
         });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'API request failed');
+        }
 
         const data = await response.json();
         const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;

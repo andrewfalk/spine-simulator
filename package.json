@@ -12,12 +12,12 @@
     "build:app": "npm run build:electron && electron-builder",
     "build:app:win7-ia32": "npm run build:electron && electron-builder --win --ia32",
     "build:offline": "vite build --mode offline",
-
     "lint": "eslint .",
     "preview": "vite preview",
     "preview:web": "vite preview --outDir docs --base /spine-simulator/ --port 4173 --open"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "lucide-react": "^0.556.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
@@ -59,4 +59,3 @@
     }
   }
 }
-

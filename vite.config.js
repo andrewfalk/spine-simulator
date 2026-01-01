@@ -10,12 +10,12 @@ export default defineConfig(({ command, mode }) => {
   return {
     base: command === 'serve'
       ? '/'
-      : (isElectron || isOffline ? './' : '/spine-simulator/'),
+      : (isElectron || isOffline ? './' : '/'),
 
     plugins: [react(), tailwindcss()],
 
     build: {
-      outDir: isElectron ? 'dist-electron' : (isOffline ? 'web-offline' : 'docs'),
+      outDir: isElectron ? 'dist-electron' : (isOffline ? 'web-offline' : 'dist'),
       emptyOutDir: true,
     },
   }

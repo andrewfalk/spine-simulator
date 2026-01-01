@@ -17,6 +17,7 @@ dist-electron
 .env
 .env.local
 .env.*.local
+process.env
 
 # Electron build output
 release/
