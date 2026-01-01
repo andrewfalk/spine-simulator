@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 
 // --- Gemini API Key Configuration ---
-const apiKey = "AIzaSyC352T_AmianH9ygQv0jet0Nzz0PlhRs-0"; // The execution environment provides the key at runtime.
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY; // The execution environment provides the key at runtime.
 
 // --- Constants & Data Models ---
 
@@ -376,6 +376,13 @@ export default function App() {
 
   const generateGeminiAssessment = async () => {
     if (!results) return;
+
+    // API 키 확인
+    if (!apiKey || apiKey === 'your_api_key_here') {
+      alert('Gemini API 키가 설정되지 않았습니다.\n\n.env 파일에 VITE_GEMINI_API_KEY를 설정해주세요.\n\n자세한 내용은 .env.example 파일을 참고하세요.');
+      return;
+    }
+
     setIsAiLoading(true);
 
     try {
